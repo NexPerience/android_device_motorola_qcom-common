@@ -47,10 +47,7 @@ TARGET_SPECIFIC_HEADER_PATH := $(LOCAL_PATH)/include
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
     audio.usb.default \
-    audio_policy.msm8960 \
-    audio.primary.msm8960 \
     audio.r_submix.default \
-    alsa.msm8960 \
     libalsa-intf \
     libaudio-resampler \
     libaudioutils \
@@ -68,22 +65,11 @@ PRODUCT_PACKAGES += \
     tcpdump \
     Torch
 
-# Lights
-PRODUCT_PACKAGES += lights.MSM8960
-
 # Charger
 PRODUCT_PACKAGES += charger charger_res_images
 
 # QRNGD
 PRODUCT_PACKAGES += qrngd
-
-# HAL
-PRODUCT_PACKAGES += \
-    copybit.msm8960 \
-    gralloc.msm8960 \
-    hwcomposer.msm8960 \
-    memtrack.msm8960 \
-    power.msm8960
 
 # Misc
 PRODUCT_PACKAGES += \
@@ -95,6 +81,10 @@ PRODUCT_PACKAGES += \
     linville.key.pub.pem \
     regdbdump \
     regulatory.bin
+
+# Qcom SoftAP
+PRODUCT_PACKAGES += \
+    libQWiFiSoftApCfg
 
 # Live Wallpapers
 PRODUCT_PACKAGES += \
@@ -112,11 +102,11 @@ PRODUCT_PACKAGES += \
 
 # Ramdisk
 PRODUCT_PACKAGES += \
-    init.qcom.usb.rc \
-    init.ril.rc
+    init.qcom.usb.rc
 
 # Init scripts
 PRODUCT_PACKAGES += \
+    init.class_main.sh \
     init.crda.sh \
     init.qcom.bt.sh \
     init.qcom.class_core.sh \
@@ -133,13 +123,16 @@ PRODUCT_PACKAGES += \
 # Thermal profiles
 PRODUCT_PACKAGES += \
     thermald-8960.conf \
-    thermald-ghost.conf
+    thermald-ghost.conf \
+    thermal-engine-8226.conf
 
 # Scripts
 PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/scripts/mount_pds.sh:system/bin/mount_pds.sh \
-    $(LOCAL_PATH)/scripts/qcamerasrvwrapper.sh:system/bin/qcamerasrvwrapper.sh \
-    $(LOCAL_PATH)/scripts/sensorsqcomwrapper.sh:system/bin/sensorsqcomwrapper.sh \
+    $(LOCAL_PATH)/scripts/mount_pds.sh:system/bin/mount_pds.sh
+
+# GPS configuration
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/config/gps.conf:system/etc/gps.conf
 
 # We have enough storage space to hold precise GC data
 PRODUCT_TAGS += dalvik.gc.type-precise
@@ -194,13 +187,13 @@ PRODUCT_PACKAGES += \
 # Symlinks
 PRODUCT_PACKAGES += \
     libxml2 \
-    mbhc.bin \
-    wcd9310_anc.bin \
     WCNSS_qcom_wlan_nv.bin
 
 # QC Perf
+ifneq ($(TARGET_BOARD_PLATFORM),msm8226)
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.vendor.extension_library=/system/lib/libqc-opt.so
+endif
 
 # QCOM
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -211,7 +204,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.audio.fluence.mode=endfire \
     persist.audio.vr.enable=false \
     persist.audio.handset.mic=digital \
-    ro.qc.sdk.audio.fluencetype=fluence \
     ro.qc.sdk.audio.ssr=false
 
 # Bluetooth
@@ -238,8 +230,11 @@ PRODUCT_PROPERTY_OVERRIDES += \
     persist.sys.qc.sub.rdump.max=20
 
 # Radio and Telephony
+ifneq ($(TARGET_BOARD_PLATFORM),msm8226)
 PRODUCT_PROPERTY_OVERRIDES += \
-    rild.libpath=/system/lib/libril-qc-qmi-1.so \
+    rild.libpath=/system/lib/libril-qc-qmi-1.so
+endif
+PRODUCT_PROPERTY_OVERRIDES += \
     ril.subscription.types=NV,RUIM \
     keyguard.no_require_sim=true \
     ro.use_data_netmgrd=true \
@@ -249,8 +244,14 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.config.vc_call_vol_steps=7 \
     ro.modem.no_wdog_chk=1
 
+PRODUCT_GMS_CLIENTID_BASE ?= android-motorola
+
 # QC time services
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.timed.enable=true
+
+# Enable KSM by default
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.ksm.default=1
 
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
